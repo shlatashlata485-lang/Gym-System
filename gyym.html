@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>جيم أبطال بطرة - نظام إدارة قسم الرجال والشباب</title>
+    <!-- Google Fonts: Cairo -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        /* 🎨 نظام التنسيق الفاخر الذهبي والمظلم للجيم */
+        :root {
+            --bg-main: #0a0a0a;             
+            --bg-card: rgba(15, 15, 15, 0.82); 
+            --bg-input: #1a1a1a;            
+            --border-color: #2b261b;        
+            
+            --gold-solid: #d4af37;          
+            --gold-bright: #ffd700;         
+            --gold-dark: #aa7c11;           
+            --gold-light: #f5d061;          
+            --gold-gradient: linear-gradient(135deg, #f5d061 0%, #d4af37 50%, #aa7c11 100%);
+            --gold-hover-gradient: linear-gradient(135deg, #fff 0%, #ffd700 50%, #d4af37 100%);
+            --gold-glow: 0 0 15px rgba(212, 175, 55, 0.25);
+            --gold-glow-strong: 0 0 25px rgba(212, 175, 55, 0.5);
+            
+            --text-main: #f5f5f5;           
+            --text-muted: #a0a0a0;          
+            
+            --status-active: #2ecc71;       
+            --status-warning: #f1c40f;      
+            --status-expired: #e74c3c;      
+            
+            --selection-row: rgba(214, 175, 55, 0.15); 
+            --font-cairo: 'Cairo', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            --transition-smooth: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: var(--font-cairo);
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            min-height: 100vh;
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* 🔑 شاشة تسجيل الدخول - خلفية متحركة وفيديو */
+        .login-wrapper {
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* 🎬 حاوية الفيديو الخلفية */
+        .login-video-bg {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            z-index: -2;
+            transform: translate(-50%, -50%);
+            object-fit: cover;
+            filter: brightness(0.25) contrast(1.1) blur(1px);
+        }
+
+        /* 🟢 تأثير الصورة المتحركة (GIF) لرجل بيتمرن خلف كارت الدخول */
+        .login-wrapper::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-image: url('https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExbnZ6OHM3bnR6YWl0dWV3Ynd5dWptZXlyeXR2dmpvMXpndWRnbnJndSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3o7TKrEzvLbsVAumzo/giphy.gif'); 
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: contain;
+            opacity: 0.12;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .login-wrapper::before {
+            content: ''; position: absolute; inset: 0;
+            background: rgba(0,0,0,0.5);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        /* اللوحة المعدنية الذهبية */
+        .login-card {
+            background: linear-gradient(160deg, rgba(58, 47, 16, 0.93) 0%, rgba(212, 175, 55, 0.93) 12%, rgba(246, 221, 140, 0.93) 24%, rgba(182, 134, 42, 0.93) 38%, rgba(138, 100, 21, 0.93) 50%, rgba(202, 162, 62, 0.93) 62%, rgba(245, 216, 120, 0.93) 74%, rgba(138, 100, 21, 0.93) 88%, rgba(58, 47, 16, 0.93) 100%);
+            border: 2px solid #6b4e12;
+            border-radius: 22px;
+            width: 100%; 
+            max-width: 430px; 
+            padding: 34px 28px 30px; 
+            box-shadow: 0 25px 60px rgba(0,0,0,0.85), inset 0 2px 4px rgba(255,255,255,0.5), inset 0 -6px 14px rgba(0,0,0,0.45), 0 0 40px rgba(212,175,55,0.25);
+            text-align: center; 
+            position: relative; 
+            overflow: hidden;
+            z-index: 1;
+        }
+        .login-card::before {
+            content: ''; position: absolute; inset: 8px; border: 1px solid rgba(255,255,255,0.35); border-radius: 16px; pointer-events: none;
+        }
+
+        .login-crest {
+            width: 92px; height: 92px; margin: 0 auto 14px; position: relative; display: flex; align-items: center; justify-content: center;
+        }
+        .login-crest svg { filter: drop-shadow(0 3px 4px rgba(0,0,0,0.6)); }
+
+        .login-title {
+            font-size: 23px; font-weight: 800; margin-bottom: 4px; color: #3a2a0a;
+            text-shadow: 0 1px 0 rgba(255,255,255,0.5), 0 -1px 0 rgba(0,0,0,0.35);
+            letter-spacing: 0.5px;
+        }
+        .login-subtitle {
+            font-size: 12.5px; font-weight: 700; color: #4a3611; margin-bottom: 18px; opacity: 0.9;
+        }
+
+        .scanner-row {
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; padding: 0 4px;
+        }
+        .scanner-tag {
+            display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 800; color: #3a2a0a; opacity: 0.85;
+        }
+        .scanner-dot { width: 8px; height: 8px; border-radius: 50%; background: #4a3611; box-shadow: 0 0 4px rgba(0,0,0,0.4); }
+        .scanner-tag.bio .scanner-dot { background: #c0392b; box-shadow: 0 0 6px rgba(192,57,43,0.8); animation: bioPulse 1.8s infinite; }
+        @keyframes bioPulse { 0%,100% { opacity: 1; } 50% { opacity: 0.35; } }
+
+        .pin-label { display: block; font-size: 13px; font-weight: 700; color: #3a2a0a; margin-bottom: 12px; }
+
+        .pin-slot {
+            background: linear-gradient(160deg, #2b2b2b 0%, #050505 50%, #2b2b2b 100%);
+            border: 1px solid #000; border-radius: 12px; padding: 16px 14px;
+            box-shadow: inset 0 3px 10px rgba(0,0,0,0.9), inset 0 -1px 0 rgba(255,255,255,0.08), 0 3px 6px rgba(0,0,0,0.5);
+            margin-bottom: 18px;
+        }
+        .pin-slot input {
+            width: 100%; background: transparent; border: none; outline: none;
+            color: #ff3b3b; text-shadow: 0 0 10px rgba(255,59,59,0.85), 0 0 18px rgba(255,59,59,0.5);
+            font-size: 26px; text-align: center; letter-spacing: 18px; font-family: monospace;
+        }
+        .pin-slot input::placeholder { color: #3a3a3a; text-shadow: none; letter-spacing: 18px; }
+
+        .btn-login {
+            width: 100%; background: linear-gradient(160deg, #7a1f2b 0%, #5c141d 45%, #3d0c12 100%);
+            border: 1px solid #2a0509; border-radius: 10px; padding: 14px;
+            font-size: 15px; font-weight: 800; color: #f0d9a8; cursor: pointer; transition: var(--transition-smooth);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.15), 0 6px 14px rgba(0,0,0,0.5);
+            letter-spacing: 0.5px;
+        }
+        .btn-login:hover { filter: brightness(1.15); box-shadow: 0 0 18px rgba(122,31,43,0.6), inset 0 1px 0 rgba(255,255,255,0.2); transform: translateY(-2px); }
+
+        #login-error {
+            color: #7a1210; font-size: 13px; margin-bottom: 14px; font-weight: 800;
+            background: rgba(0,0,0,0.12); border-radius: 8px; padding: 6px;
+        }
+        .hidden { display: none !important; }
+
+        /* بقية تنسيقات السيستم الداخلي */
+        .dashboard-wrapper { max-width: 1600px; margin: 0 auto; padding: 25px; }
+        .main-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; background-color: rgba(20,20,20,0.85); border: 1px solid var(--border-color); border-radius: 15px; padding: 20px; margin-bottom: 25px; }
+        .clinic-brand { display: flex; align-items: center; gap: 15px; }
+        .brand-logo { width: 45px; height: 45px; background: var(--gold-gradient); border-radius: 12px; display: flex; justify-content: center; align-items: center; color: #121212; box-shadow: var(--gold-glow); }
+        .brand-text h1 { font-size: 20px; font-weight: 800; background: var(--gold-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .brand-text p { font-size: 12px; color: var(--text-muted); font-weight: 600; }
+        .nav-tabs { display: flex; background-color: var(--bg-input); border: 1px solid var(--border-color); border-radius: 10px; padding: 5px; gap: 5px; }
+        .tab-btn { background: none; border: none; color: var(--text-muted); padding: 10px 18px; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 13px; }
+        .tab-btn.active-tab { background: var(--gold-gradient); color: #121212; box-shadow: var(--gold-glow); }
+        .btn-logout { background-color: rgba(231, 76, 60, 0.1); border: 1px solid rgba(231, 76, 60, 0.3); color: #ff6b6b; padding: 10px 18px; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; }
+        
+        .dashboard-grid { display: grid; grid-template-columns: 290px 220px 1fr; gap: 20px; margin-bottom: 25px; }
+        .grid-section { background-color: rgba(20,20,20,0.85); border: 1px solid var(--border-color); border-radius: 15px; padding: 22px; position: relative; }
+        .section-title-badge { position: absolute; top: -12px; right: 20px; background: var(--gold-gradient); color: #121212; font-size: 12px; font-weight: 800; padding: 2px 14px; border-radius: 30px; }
+        .section-left { display: flex; flex-direction: column; justify-content: space-between; gap: 15px; }
+        .digital-clock-container { background-color: rgba(212, 175, 55, 0.04); border: 1px solid rgba(212, 175, 55, 0.15); border-radius: 10px; padding: 12px; text-align: center; }
+        .digital-clock { font-size: 28px; font-weight: 800; color: var(--gold-bright); text-shadow: 0 0 10px rgba(255, 215, 0, 0.4); font-family: monospace; direction: ltr; }
+        
+        .company-brand-card { background-color: var(--bg-input); border: 1px solid var(--border-color); border-radius: 10px; padding: 15px 10px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; border-color: rgba(46, 204, 113, 0.1); }
+        .company-logo-svg { width: 55px; height: 55px; filter: drop-shadow(0 0 8px rgba(46, 204, 113, 0.6)); }
+        .company-name-text { color: #2ecc71; font-size: 16px; font-weight: 800; letter-spacing: 0.8px; text-shadow: 0 0 10px rgba(46, 204, 113, 0.3); }
+        
+        .operations-grid { display: flex; flex-direction: column; gap: 10px; height: 100%; justify-content: center; }
+        .btn-op { width: 100%; border: 1px solid var(--border-color); border-radius: 10px; padding: 11px; font-size: 14px; font-weight: 700; cursor: pointer; text-align: right; display: flex; gap: 10px; align-items: center; justify-content: flex-start; }
+        .btn-yellow-gold { background: var(--gold-gradient); color: #121212; }
+        .btn-danger-gold { background-color: rgba(231, 76, 60, 0.15); border: 1px solid var(--status-expired); color: #ff6b6b; }
+        
+        .patient-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .full-width-field { grid-column: span 2; }
+        .form-group { display: flex; flex-direction: column; gap: 5px; }
+        .form-group label { font-size: 12px; font-weight: 700; color: var(--text-muted); }
+        .form-group input, .form-group select { width: 100%; background-color: var(--bg-input); border: 1px solid var(--border-color); border-radius: 8px; padding: 8px 12px; color: var(--text-main); font-size: 13px; font-weight: 600; outline: none; }
+        
+        .table-section { background-color: rgba(20,20,20,0.85); border: 1px solid var(--border-color); border-radius: 15px; padding: 22px; margin-bottom: 25px; }
+        .table-header-bar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 18px; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; }
+        
+        .filter-status-container { display: flex; gap: 10px; flex-wrap: wrap; }
+        .filter-btn { background-color: var(--bg-input); border: 1px solid var(--border-color); color: var(--text-main); padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+        .filter-btn:hover, .filter-btn.active-filter { border-color: var(--gold-solid); background-color: rgba(212, 175, 55, 0.08); }
+        .circle-badge { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+        .cb-all { background: #fff; }
+        .cb-active { background: var(--status-active); }
+        .cb-warning { background: var(--status-warning); }
+        .cb-expired { background: var(--status-expired); }
+        
+        .status-badge-text { padding: 4px 10px; border-radius: 30px; font-size: 11px; font-weight: 800; display: inline-block; text-align: center; }
+        .badge-active { background-color: rgba(46, 204, 113, 0.15); color: var(--status-active); border: 1px solid var(--status-active); }
+        .badge-warning { background-color: rgba(241, 196, 15, 0.15); color: var(--status-warning); border: 1px solid var(--status-warning); }
+        .badge-expired { background-color: rgba(231, 76, 60, 0.15); color: var(--status-expired); border: 1px solid var(--status-expired); }
+        .badge-critical { background-color: rgba(231, 76, 60, 0.28); color: #ff8080; border: 1px solid #ff3b3b; box-shadow: 0 0 8px rgba(231,76,60,0.6); animation: criticalPulse 1.6s infinite; }
+        @keyframes criticalPulse { 0%,100% { opacity: 1; } 50% { opacity: 0.55; } }
+        .row-critical td { background-color: rgba(231, 76, 60, 0.06); }
+        
+        .table-responsive-container { overflow-x: auto; border-radius: 10px; border: 1px solid var(--border-color); max-height: 400px; }
+        .clinic-table { width: 100%; border-collapse: collapse; text-align: right; font-size: 13px; }
+        .clinic-table th { background-color: #121212; color: var(--gold-solid); font-weight: 700; padding: 12px 15px; position: sticky; top: 0; z-index: 10; }
+        .clinic-table td { padding: 12px 15px; border-bottom: 1px solid var(--border-color); color: #e0e0e0; font-weight: 600; }
+        .clinic-table tbody tr:hover td { background-color: rgba(212, 175, 55, 0.04); cursor: pointer; }
+        .clinic-table tbody tr.active-row td { background-color: var(--selection-row); border-top: 1px solid var(--gold-solid); border-bottom: 1px solid var(--gold-solid); }
+        
+        .financial-container-center { max-width: 1200px; margin: 10px auto; background-color: rgba(20,20,20,0.85); border: 1px solid var(--border-color); border-radius: 20px; padding: 30px; box-shadow: var(--gold-glow); }
+        .financial-grid-center { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 30px; text-align: center; }
+        .finance-card-center { background-color: var(--bg-input); border: 1px solid var(--border-color); border-radius: 15px; padding: 20px; display: flex; flex-direction: column; justify-content: center; }
+        .finance-card-center h3 { font-size: 14px; margin-bottom: 8px; color: var(--text-main); }
+        .val-in { color: var(--status-active); font-size: 22px; font-weight: 800; } 
+        .val-out { color: #ff6b6b; font-size: 22px; font-weight: 800; } 
+        .val-net { color: var(--gold-bright); text-shadow: var(--gold-glow); font-size: 24px; font-weight: 800; }
+        .val-members { color: var(--gold-solid); font-size: 22px; font-weight: 800; }
+        .select-month-style { background: #121212; border: 1px solid var(--gold-dark); color: var(--gold-light); padding: 3px 8px; font-size: 12px; border-radius: 6px; font-weight: bold; outline: none; margin-top: 5px; width: 100%; cursor: pointer; }
+
+        .expense-management-layout { display: grid; grid-template-columns: 350px 1fr; gap: 20px; margin-bottom: 25px; }
+        .system-footer { text-align: center; margin-top: 30px; padding: 15px; font-size: 12px; color: var(--text-muted); border-top: 1px solid var(--border-color); }
+        
+        /* تجميل شاشة الحضور اليومي */
+        .attendance-layout { display: grid; grid-template-columns: 380px 1fr; gap: 20px; }
+        .search-box-container { position: relative; margin-bottom: 12px; }
+        .search-box-container input { width: 100%; background-color: rgba(10,10,10,0.8); border: 1px solid var(--border-color); border-radius: 8px; padding: 10px 35px 10px 12px; color: #fff; font-size: 13px; outline: none; }
+        .search-box-container input:focus { border-color: var(--gold-solid); }
+        .search-icon-svg { position: absolute; top: 50%; right: 12px; transform: translateY(-50%); color: var(--gold-solid); pointer-events: none; }
+        
+        .btn-whatsapp { background: #25D366; color: #fff; border: none; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; margin-right: 5px; text-decoration: none; }
+        .btn-whatsapp:hover { background: #20ba5a; }
+        .history-section { margin-top: 25px; background: rgba(15,15,15,0.5); padding: 15px; border-radius: 10px; border: 1px dashed var(--border-color); }
+    </style>
+</head>
+<body>
+
+    <!-- 🔑 شاشة الدخول مع فيديو متحرك وصورة تمارين خلف الكارت -->
+    <div id="login-container" class="login-wrapper">
+        
+        <!-- فيديو خلفية عالي الجودة شغال مباشرة -->
+        <video autoplay muted loop playsinline class="login-video-bg">
+            <source src="https://assets.mixkit.co/videos/preview/mixkit-man-runs-on-a-treadmill-in-a-gym-41561-large.mp4" type="video/mp4">
+        </video>
+
+        <div class="login-card">
+            <div class="login-crest">
+                <svg width="80" height="80" viewBox="0 0 100 100">
+                    <defs>
+                        <linearGradient id="crestShield" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stop-color="#7a1f2b"/>
+                            <stop offset="100%" stop-color="#3d0c12"/>
+                        </linearGradient>
+                    </defs>
+                    <path d="M50 8 L82 20 V48 C82 70 68 84 50 92 C32 84 18 70 18 48 V20 Z" fill="url(#crestShield)" stroke="#3a2a0a" stroke-width="2"/>
+                    <path d="M50 30c-8 0-14 6-14 13 0 5 3 8 5 10-4 1-8 4-8 9h34c0-5-4-8-8-9 2-2 5-5 5-10 0-7-6-13-14-13z" fill="#d4af37"/>
+                    <circle cx="45" cy="41" r="1.6" fill="#3a2a0a"/>
+                    <circle cx="55" cy="41" r="1.6" fill="#3a2a0a"/>
+                </svg>
+            </div>
+            <h2 class="login-title">بوابة الدخول المحمية</h2>
+            <p class="login-subtitle">نظام صالة أبطال بطرة المطور ⚡</p>
+
+            <div class="scanner-row">
+                <span class="scanner-tag"><span class="scanner-dot"></span> NFC</span>
+                <span class="scanner-tag bio">Biometric <span class="scanner-dot"></span></span>
+            </div>
+
+            <label class="pin-label" for="password">أدخل الرمز السري للوصول</label>
+            <form id="login-form">
+                <div class="pin-slot">
+                    <input type="password" id="password" inputmode="numeric" maxlength="6" placeholder="______" required autocomplete="off">
+                </div>
+                <div id="login-error" class="hidden">❌ كود السر غير صحيح، حاول ثانية!</div>
+                <button type="submit" class="btn-login">تأكيد الهوية ودخول النظام</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 🏛️ النظام الداخلي للجيم -->
+    <div id="dashboard-container" class="dashboard-wrapper hidden">
+        <header class="main-header">
+            <div class="clinic-brand">
+                <div class="brand-logo">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M6 18H4a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h2m12 8h2a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2h-2M6 12h12M6 7v10m12-10v10"/>
+                    </svg>
+                </div>
+                <div class="brand-text">
+                    <h1>جيم أبطال بطرة</h1>
+                    <p>المطور الذكي لإدارة الصالة الرياضية 👑 (قسم الرجال والشباب)</p>
+                </div>
+            </div>
+            <nav class="nav-tabs">
+                <button id="tab-girls" class="tab-btn active-tab">💪 قسم الرجال والشباب</button>
+                <button id="tab-attendance" class="tab-btn">⏱️ التسجيلات اليومية</button>
+                <button id="tab-finance" class="tab-btn">📊 الإيرادات والمصروفات</button>
+            </nav>
+            <button id="btn-logout" class="btn-logout">تسجيل خروج</button>
+        </header>
+
+        <!-- القسم الأول: إدارة المشتركين الأساسيين -->
+        <div id="page-girls-content">
+            <div class="dashboard-grid">
+                <aside class="grid-section section-left">
+                    <div class="section-title-badge">المنصة</div>
+                    <div class="digital-clock-container">
+                        <div id="digital-clock" class="digital-clock">00:00:00</div>
+                        <div id="clock-date" style="font-size:11px; color:var(--text-muted);">---</div>
+                        <div id="sync-status" style="font-size:10px; margin-top:4px;">⏳ جاري الاتصال...</div>
+                    </div>
+                    <div class="company-brand-card">
+                        <svg class="company-logo-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="50" cy="50" r="42" stroke="#2ecc71" stroke-width="3" stroke-dasharray="4 2"/>
+                            <path d="M50 25V42M35 60L46 52M65 60L54 52" stroke="#2ecc71" stroke-width="3.5" stroke-linecap="round"/>
+                            <circle cx="50" cy="49" r="4" fill="#2ecc71"/>
+                        </svg>
+                        <span class="company-name-text">Shlata Hub</span>
+                    </div>
+                </aside>
+
+                <section class="grid-section">
+                    <div class="section-title-badge">التحكم</div>
+                    <div class="operations-grid">
+                        <button id="btn-member-new" class="btn-op btn-yellow-gold"><span>✨</span> تفريغ الخانات</button>
+                        <button id="btn-member-add" class="btn-op btn-yellow-gold"><span>➕</span> إضافة لاعب جديد</button>
+                        <button id="btn-member-renew" class="btn-op btn-yellow-gold" style="background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%); color:#fff;"><span>🔄</span> تجديد لاشتراك جديد</button>
+                        <button id="btn-member-edit" class="btn-op btn-yellow-gold"><span>✏️</span> تعديل المشترك الحالى</button>
+                        <button id="btn-member-delete" class="btn-op btn-danger-gold"><span>❌</span> حذف وإلغاء</button>
+                    </div>
+                </section>
+
+                <section class="grid-section">
+                    <div class="section-title-badge">بيانات المشترك</div>
+                    <form id="member-form" class="patient-form-grid">
+                        <div class="form-group full-width-field">
+                            <label>اسم المشترك الثلاثي</label>
+                            <input type="text" id="mem-name" placeholder="اسم اللاعب" required>
+                        </div>
+                        <div class="form-group">
+                            <label>رقم الموبايل</label>
+                            <input type="text" id="mem-phone" placeholder="01XXXXXXXXX" required>
+                        </div>
+                        <div class="form-group">
+                            <label>نوع التدريب</label>
+                            <select id="mem-type">
+                                <option value="حديد وكارديو">حديد وكارديو</option>
+                                <option value="حديد فقط">حديد فقط</option>
+                                <option value="كيك بوكسينغ وفيتنس">كيك بوكسينغ وفيتنس</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>الوزن الحجمي (كجم)</label>
+                            <input type="number" id="mem-weight" placeholder="0">
+                        </div>
+                        <div class="form-group">
+                            <label>السن (العمر)</label>
+                            <input type="number" id="mem-age" placeholder="العمر الحقيقي">
+                        </div>
+                        <div class="form-group full-width-field">
+                            <label>مدة برنامج الاشتراك</label>
+                            <select id="mem-duration">
+                                <option value="15 يوم">15 يوم</option>
+                                <option value="شهر واحد" selected>شهر واحد</option>
+                                <option value="3 أشهر">3 أشهر</option>
+                                <option value="6 أشهر">6 أشهر</option>
+                                <option value="سنة كاملة">سنة كاملة</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>تاريخ بدء الاشتراك</label>
+                            <input type="date" id="mem-start-date" required>
+                        </div>
+                        <div class="form-group">
+                            <label>تاريخ نهاية الاشتراك</label>
+                            <input type="date" id="mem-end-date" required readonly style="background-color: #222; border-color: rgba(212,175,55,0.4); color: var(--gold-bright); font-weight: bold; cursor: not-allowed;">
+                        </div>
+                        <div class="form-group" style="grid-column: span 2;">
+                            <label>المبلغ المدفوع (ج.م)</label>
+                            <input type="number" id="mem-price" placeholder="0" required>
+                        </div>
+                    </form>
+                </section>
+            </div>
+
+            <!-- عرض السجل التاريخي للمشترك المحدد -->
+            <div id="member-history-section" class="history-section hidden">
+                <h3 style="font-size: 14px; color: var(--gold-solid); margin-bottom: 10px;">📋 السجل التاريخي لااشتراكات اللاعب: <span id="history-player-name" style="color: #fff;"></span></h3>
+                <div class="table-responsive-container">
+                    <table class="clinic-table" style="font-size: 11px;">
+                        <thead>
+                            <tr>
+                                <th>البرنامج</th><th>النوع</th><th>تاريخ البدء</th><th>تاريخ الانتهاء</th><th>المبلغ المدفوع</th>
+                            </tr>
+                        </thead>
+                        <tbody id="history-table-body"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <section class="table-section" style="margin-top:20px;">
+                <div class="table-header-bar">
+                    <div>
+                        <h2 style="font-size:16px; margin-bottom:8px;">قائمة المشتركين النشطة</h2>
+                        <div class="filter-status-container">
+                            <button class="filter-btn active-filter" data-filter="all"><span class="circle-badge cb-all"></span> الكل</button>
+                            <button class="filter-btn" data-filter="active"><span class="circle-badge cb-active"></span> لسا بدري</button>
+                            <button class="filter-btn" data-filter="warning"><span class="circle-badge cb-warning"></span> قرب يخلص</button>
+                            <button class="filter-btn" data-filter="expired"><span class="circle-badge cb-expired"></span> انتهى</button>
+                        </div>
+                    </div>
+                    <div style="max-width: 300px; width: 100%;">
+                        <input type="text" id="quick-search" placeholder="بحث سريع بالاسم...">
+                    </div>
+                </div>
+                <div class="table-responsive-container">
+                    <table class="clinic-table">
+                        <thead>
+                            <tr>
+                                <th>كود</th><th>الاسم</th><th>الموبايل</th><th>البرنامج</th><th>نوع التدريب</th><th>الوزن / السن</th><th>بدء</th><th>انتهاء</th><th>القيمة</th><th>الحالة والاتصال</th>
+                            </tr>
+                        </thead>
+                        <tbody id="members-table-body"></tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+
+        <!-- ⏱️ القسم الثاني: التسجيلات اليومية -->
+        <div id="page-attendance-content" class="hidden">
+            <section class="table-section">
+                <h2 style="font-size:18px; color:var(--gold-solid); margin-bottom:20px; border-bottom:1px solid var(--border-color); padding-bottom:10px;">⏱️ كشف الحضور والانصراف اليومي والزيارات السريعة</h2>
+                <div class="attendance-layout">
+                    <div style="background: var(--bg-input); padding: 22px; border-radius: 12px; border: 1px solid var(--border-color);">
+                        <h3 style="font-size: 14px; color:var(--gold-bright); margin-bottom:15px;">➕ تسجيل حضور يومي جديد</h3>
+                        <form id="attendance-form" style="display:flex; flex-direction:column; gap:15px;">
+                            <div class="form-group">
+                                <label>نوع الزائر</label>
+                                <select id="att-visitor-type">
+                                    <option value="مشترك">لاعب مشترك بالصالة</option>
+                                    <option value="زيارة">زيارة يومية حرة (تذكرة حرة)</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group" id="group-select-member">
+                                <label>ابحث واختر اسم المشترك</label>
+                                <div class="search-box-container">
+                                    <svg class="search-icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                        <circle cx="11" cy="11" r="8"></circle>
+                                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                    </svg>
+                                    <input type="text" id="att-search-input" placeholder="اكتب اسم اللاعب للبحث الفوري عنه...">
+                                </div>
+                                <select id="att-member-select" size="4" style="height: auto; max-height: 120px; overflow-y: auto;">
+                                </select>
+                            </div>
+                            
+                            <div class="form-group hidden" id="group-custom-name">
+                                <label>اسم الزائر الحر</label>
+                                <input type="text" id="att-custom-name" placeholder="اكتب اسم الزائر هنا">
+                            </div>
+                            <div class="form-group hidden" id="group-visit-price">
+                                <label>رسوم التذكرة اليومية (ج.م)</label>
+                                <input type="number" id="att-visit-price" value="50" placeholder="0">
+                            </div>
+                            <button type="submit" class="btn-login" style="padding:10px; font-size:14px;">تسجيل دخول الآن</button>
+                        </form>
+                    </div>
+                    
+                    <div>
+                        <h3 style="font-size: 14px; margin-bottom:12px; color:var(--text-muted);">سجل حركة اليوم</h3>
+                        <div class="table-responsive-container" style="max-height: 380px;">
+                            <table class="clinic-table">
+                                <thead>
+                                    <tr>
+                                        <th>الاسم</th><th>النوع</th><th>وقت الحضور</th><th>وقت الانصراف</th><th>رسوم الزيارة</th><th>الإجراء</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="attendance-table-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- القسم الثالث: الحسابات والمالية -->
+        <div id="page-finance-content" class="hidden">
+            <div class="financial-container-center">
+                <h2 style="text-align: center; margin-bottom: 20px; font-size: 18px; color: var(--gold-solid);">📈 تقرير حسابات قسم الرجال وصافي الأرباح</h2>
+                <div class="financial-grid-center">
+                    <div class="finance-card-center"><h3>💵 إجمالي الاشتراكات والزيارات</h3><p class="val-in" id="fin-total-revenue">0 ج.م</p></div>
+                    <div class="finance-card-center"><h3>💸 إجمالي المصروفات</h3><p class="val-out" id="fin-total-expenses">0 ج.م</p></div>
+                    <div class="finance-card-center"><h3>💰 صافي ربح الجيم</h3><p class="val-net" id="fin-net-profit">0 ج.م</p></div>
+                    <div class="finance-card-center" style="border: 1px solid rgba(212, 175, 55, 0.4); background: linear-gradient(135deg, #1b160f 0%, #110f0a 100%);">
+                        <h3>👥 إجمالي المشتركين العام</h3>
+                        <p class="val-members" id="fin-total-members">0 لاعب</p>
+                        <div style="margin-top: 5px; border-top: 1px dashed rgba(212, 175, 55, 0.2); padding-top: 5px;">
+                            <label style="font-size: 11px; color: var(--text-muted); font-weight: bold;">مشتركين شهر معين:</label>
+                            <select id="fin-filter-month" class="select-month-style">
+                                <option value="all">اختر الشهر...</option>
+                                <option value="01">يناير (01)</option>
+                                <option value="02">فبراير (02)</option>
+                                <option value="03">مارس (03)</option>
+                                <option value="04">أبريل (04)</option>
+                                <option value="05">مايو (05)</option>
+                                <option value="06">يونيو (06)</option>
+                                <option value="07">يوليو (07)</option>
+                                <option value="08">أغسطس (08)</option>
+                                <option value="09">سبتمبر (09)</option>
+                                <option value="10">أكتوبر (10)</option>
+                                <option value="11">نوفمبر (11)</option>
+                                <option value="12">ديسمبر (12)</option>
+                            </select>
+                            <p id="fin-monthly-count" style="font-size: 13px; color: var(--gold-bright); font-weight: bold; margin-top: 3px; display:none;">عدد المشتركين: 0</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="background: rgba(255, 215, 0, 0.03); border: 1px dashed var(--gold-solid); padding: 18px; border-radius: 12px; margin-bottom: 25px;">
+                    <h4 style="font-size: 14px; margin-bottom: 12px; color: var(--gold-bright); display: flex; align-items: center; gap: 8px;">
+                        <span>📊</span> حركة الحضور اليومي والزيارات المحصلة ماليًا
+                    </h4>
+                    <div class="table-responsive-container" style="max-height: 180px;">
+                        <table class="clinic-table" style="font-size: 12px;">
+                            <thead>
+                                <tr>
+                                    <th>الاسم</th><th>النوع</th><th>وقت الحضور</th><th>المبلغ المحصل للزيارة</th>
+                                </tr>
+                            </thead>
+                            <tbody id="finance-attendance-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="expense-management-layout">
+                    <div style="background: var(--bg-input); padding: 20px; border-radius: 12px; border: 1px solid var(--border-color);">
+                        <h4 style="font-size: 14px; margin-bottom: 15px; color: var(--gold-solid);">➕ تسجيل بند مصروفات جديد</h4>
+                        <form id="expense-form" style="display: flex; flex-direction: column; gap: 12px;">
+                            <div class="form-group"><label>بيان المصروف</label><input type="text" id="exp-title" placeholder="كهرباء، إيجار، صيانة.." required></div>
+                            <div class="form-group"><label>المبلغ (ج.م)</label><input type="number" id="exp-amount" placeholder="0" required></div>
+                            <div class="form-group"><label>التاريخ</label><input type="date" id="exp-date" required></div>
+                            <button type="submit" class="btn-login" style="padding: 10px; font-size: 14px;">حفظ المصروف</button>
+                        </form>
+                    </div>
+                    <div>
+                        <h4 style="font-size: 14px; margin-bottom: 15px;">📋 دفتر قيد المصروفات العامة</h4>
+                        <div class="table-responsive-container" style="max-height: 250px;">
+                            <table class="clinic-table">
+                                <thead><tr><th>كود</th><th>بيان المصروف</th><th>التاريخ</th><th>المبلغ</th><th>إجراء</th></tr></thead>
+                                <tbody id="expenses-table-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <footer class="system-footer"><p>جميع الحقوق محفوظة لـ جيم أبطال بطرة &copy; 2026</p></footer>
+    </div>
+
+    <script>
+        // الروابط والربط الداخلي
+        const GOOGLE_SCRIPT_URL = ""; // يعمل السيستم حالياً وتلقائياً على الذاكرة المحلية الممتازة
+
+        let db = { girls: [], expenses: [], attendance: [] }; 
+        let selectedId = null; 
+        let activeStatusFilter = "all";
+        
+        document.addEventListener("DOMContentLoaded", () => {
+            document.getElementById("mem-start-date").valueAsDate = new Date(); 
+            autoCalculateEndDate();
+            
+            const video = document.querySelector('.login-video-bg');
+            if (video) { video.play().catch(e => console.log("Auto-play prevented", e)); }
+
+            document.getElementById("login-form").addEventListener("submit", (e) => {
+                e.preventDefault();
+                if(document.getElementById("password").value === "123456") {
+                    document.getElementById("login-container").classList.add("hidden");
+                    document.getElementById("dashboard-container").classList.remove("hidden"); 
+                    initSystem();
+                } else { document.getElementById("login-error").classList.remove("hidden"); }
+            });
+            document.getElementById("btn-logout").addEventListener("click", () => window.location.reload());
+        });
+        
+        function initSystem() { startClock(); setupEvents(); loadData().then(() => { updateMemberDropdown(); startCloudSync(); }); }
+        function startClock() { setInterval(() => { const now = new Date(); document.getElementById("digital-clock").textContent = now.toTimeString().split(' ')[0]; document.getElementById("clock-date").textContent = now.toLocaleDateString('ar-EG', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }); }, 1000); }
+        
+        function autoCalculateEndDate() {
+            const startDateVal = document.getElementById("mem-start-date").value; 
+            const durationVal = document.getElementById("mem-duration").value; 
+            const endDateInput = document.getElementById("mem-end-date");
+            if(!startDateVal) return; 
+            let startDate = new Date(startDateVal);
+            
+            if (durationVal === "15 يوم") startDate.setDate(startDate.getDate() + 15);
+            else if (durationVal === "شهر واحد") startDate.setMonth(startDate.getMonth() + 1);
+            else if (durationVal === "3 أشهر") startDate.setMonth(startDate.getMonth() + 3);
+            else if (durationVal === "6 أشهر") startDate.setMonth(startDate.getMonth() + 6);
+            else if (durationVal === "سنة كاملة") startDate.setFullYear(startDate.getFullYear() + 1);
+            
+            const y = startDate.getFullYear(); 
+            const m = String(startDate.getMonth() + 1).padStart(2, '0'); 
+            const d = String(startDate.getDate()).padStart(2, '0'); 
+            endDateInput.value = `${y}-${m}-${d}`;
+        }
+        
+        function formatToCustomDate(dateStr) { if(!dateStr) return "---"; const d = new Date(dateStr); if (isNaN(d.getTime())) return dateStr; return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; }
+
+        const ARABIC_MONTHS = ["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"];
+        function getArabicFullDate(dateStr) {
+            if(!dateStr) return "---"; const d = new Date(dateStr); if (isNaN(d.getTime())) return dateStr;
+            return `${d.getDate()} ${ARABIC_MONTHS[d.getMonth()]} ${d.getFullYear()}`;
+        }
+
+        function buildReminderMessage(m) {
+            const today = new Date(); today.setHours(0,0,0,0);
+            const endDate = new Date(m.endDate); endDate.setHours(0,0,0,0);
+            const diffDays = Math.ceil((endDate - today) / (1000 * 60 * 60 * 24));
+            const fullDate = getArabicFullDate(m.endDate);
+            let statusLine;
+            if (diffDays < 0) statusLine = `وخلصان له ${Math.abs(diffDays)} يوم`;
+            else if (diffDays === 0) statusLine = `وده اليوم بتاعه بالظبط`;
+            else statusLine = `وباقي عليه ${diffDays} يوم`;
+            return `السلام عليكم يا كابتن ${m.name}، اشتراكك في جيم أبطال بطرة تاريخ انتهاؤه يوم ${fullDate} ${statusLine}. يرجى التكرم بتشريفنا لتجديد الاشتراك والحفاظ على استمرارية تمرينك العظيم! 💪⚡`;
+        }
+
+        // 🌐 رابط تطبيق Google Apps Script (Web App) اللي هيشتغل كـ "سيرفر" لمزامنة البيانات بين كل الأجهزة
+        // استبدل النص ده برابط النشر بتاعك بعد ما تعمل خطوات النشر (موضحة في ملف التعليمات المرفق)
+        const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxeSOxvCgg7LbTruRG9iERVCN6QdZVk_Z8yhdvsY_XBxoiYu_Jma6yIuLqnIwbj1o93/exec";
+        const SYNC_INTERVAL_MS = 15000; // كل قد ايه (بالمللي ثانية) نجيب آخر بيانات من الشيت لعرضها على كل الأجهزة
+        let syncIndicator = null;
+
+        function isSyncConfigured() { return APPS_SCRIPT_URL && APPS_SCRIPT_URL.startsWith("http"); }
+
+        function setSyncStatus(text, ok) {
+            if(!syncIndicator) syncIndicator = document.getElementById("sync-status");
+            if(!syncIndicator) return;
+            syncIndicator.textContent = text;
+            syncIndicator.style.color = ok ? "#2ecc71" : "#e74c3c";
+        }
+
+        async function loadData(silent) {
+            if(isSyncConfigured()) {
+                try {
+                    const res = await fetch(APPS_SCRIPT_URL + "?t=" + Date.now());
+                    if(!res.ok) throw new Error("HTTP " + res.status);
+                    const remote = await res.json();
+                    db = remote && typeof remote === "object" ? remote : { girls: [], expenses: [], attendance: [] };
+                    localStorage.setItem("heroes_batra_gym_girls_v2", JSON.stringify(db));
+                    setSyncStatus("☁️ متصل بجوجل شيت", true);
+                } catch(err) {
+                    console.log("تعذر الاتصال بجوجل شيت، سيتم استخدام آخر نسخة محفوظة محليًا", err);
+                    setSyncStatus("⚠️ غير متصل - بيانات محلية", false);
+                    const local = localStorage.getItem("heroes_batra_gym_girls_v2");
+                    db = local ? JSON.parse(local) : { girls: [], expenses: [], attendance: [] };
+                }
+            } else {
+                setSyncStatus("⚠️ لم يتم ربط جوجل شيت بعد", false);
+                const local = localStorage.getItem("heroes_batra_gym_girls_v2");
+                db = local ? JSON.parse(local) : { girls: [], expenses: [], attendance: [] };
+            }
+            if(!db.girls) db.girls = [];
+            if(!db.expenses) db.expenses = [];
+            if(!db.attendance) db.attendance = [];
+            if(!silent) { renderTable(); renderExpensesTable(); renderAttendanceTable(); }
+            else { renderTable(); renderExpensesTable(); renderAttendanceTable(); updateMemberDropdown(document.getElementById("att-search-input") ? document.getElementById("att-search-input").value : ""); }
+        }
+
+        async function save() {
+            localStorage.setItem("heroes_batra_gym_girls_v2", JSON.stringify(db)); // حفظ فوري محلي كنسخة احتياطية
+            if(!isSyncConfigured()) return;
+            try {
+                await fetch(APPS_SCRIPT_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "text/plain;charset=utf-8" }, // text/plain عشان نتفادى مشاكل CORS مع Apps Script
+                    body: JSON.stringify(db)
+                });
+                setSyncStatus("☁️ متصل بجوجل شيت", true);
+            } catch(err) {
+                console.log("تعذر حفظ البيانات على جوجل شيت", err);
+                setSyncStatus("⚠️ فشل الحفظ على جوجل شيت - هيتم المحاولة تاني", false);
+            }
+        }
+
+        function startCloudSync() {
+            if(!isSyncConfigured()) return;
+            setInterval(() => { loadData(true); }, SYNC_INTERVAL_MS);
+        }
+
+        function getSubscriptionStatus(endDateStr) {
+            if(!endDateStr) return { label: "غير محدد", class: "badge-expired", code: "expired", overdueDays: 0 };
+            const today = new Date(); today.setHours(0,0,0,0); const endDate = new Date(endDateStr); endDate.setHours(0,0,0,0);
+            const diffDays = Math.ceil((endDate - today) / (1000 * 60 * 60 * 24));
+            if (diffDays < 0) {
+                const overdueDays = Math.abs(diffDays);
+                const overdueMonths = Math.floor(overdueDays / 30);
+                if (overdueMonths >= 1) {
+                    return { label: `⚠️ متأخر ${overdueMonths} ${overdueMonths === 1 ? "شهر" : "شهور"}`, class: "badge-critical", code: "expired", overdueDays };
+                }
+                return { label: `متأخر ${overdueDays} يوم ❌`, class: "badge-expired", code: "expired", overdueDays };
+            }
+            if (diffDays <= 7) return { label: `ينتهي خلال ${diffDays} يوم`, class: "badge-warning", code: "warning", overdueDays: 0 };
+            return { label: "نشطة وسارية", class: "badge-active", code: "active", overdueDays: 0 };
+        }
+        
+        function updateMemberDropdown(filterText = "") {
+            const select = document.getElementById("att-member-select");
+            select.innerHTML = "";
+            const searchTerms = filterText.toLowerCase().trim();
+            const filteredGirls = (db.girls || []).filter(m => m.name.toLowerCase().includes(searchTerms));
+            if(filteredGirls.length === 0) {
+                select.innerHTML = "<option value='' disabled>لا توجد نتائج مطابقة للبحث</option>";
+                return;
+            }
+            filteredGirls.forEach((m, index) => {
+                const opt = document.createElement("option");
+                opt.value = m.name; opt.textContent = m.name;
+                if(index === 0) opt.selected = true; 
+                select.appendChild(opt);
+            });
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById("members-table-body"); tbody.innerHTML = ""; let currentList = db.girls || [];
+            if(activeStatusFilter !== "all") currentList = currentList.filter(m => getSubscriptionStatus(m.endDate).code === activeStatusFilter);
+            if(currentList.length === 0) { tbody.innerHTML = `<tr><td colspan="10" style="text-align:center; color:var(--text-muted); padding:20px;">📭 لا توجد نتائج.</td></tr>`; calculateFinance(); return; }
+
+            currentList = currentList.map(m => ({ m, status: getSubscriptionStatus(m.endDate) }))
+                .sort((a, b) => {
+                    const priority = s => s.class === "badge-critical" ? 0 : s.code === "expired" ? 1 : s.code === "warning" ? 2 : 3;
+                    const pa = priority(a.status), pb = priority(b.status);
+                    if(pa !== pb) return pa - pb;
+                    return b.status.overdueDays - a.status.overdueDays;
+                });
+
+            currentList.forEach(({ m, status }) => {
+                const tr = document.createElement("tr"); if(selectedId === m.id) tr.classList.add("active-row");
+                if(status.class === "badge-critical") tr.classList.add("row-critical");
+                
+                const msg = encodeURIComponent(buildReminderMessage(m));
+                const whatsappBtn = `<a href="https://wa.me/2${m.phone}?text=${msg}" target="_blank" class="btn-whatsapp">📱 تذكير</a>`;
+                
+                tr.innerHTML = `<td>${m.id}</td><td style="color:#fff; font-weight:700;">${m.name}</td><td>${m.phone}</td><td style="color:var(--gold-light); font-weight:700;">${m.duration||'شهر واحد'}</td><td>${m.type}</td><td>${m.weight||'--'}كجم / ${m.age||'--'} سنة</td><td>${formatToCustomDate(m.startDate)}</td><td>${formatToCustomDate(m.endDate)}</td><td style="color:var(--gold-solid);">${m.price} ج.م</td><td><span class="status-badge-text ${status.class}">${status.label}</span> ${whatsappBtn}</td>`;
+                
+                tr.addEventListener("click", () => {
+                    selectedId = m.id; renderTable(); showHistory(m);
+                    document.getElementById("mem-name").value = m.name; document.getElementById("mem-phone").value = m.phone; document.getElementById("mem-weight").value = m.weight || ""; document.getElementById("mem-age").value = m.age || ""; document.getElementById("mem-type").value = m.type; document.getElementById("mem-duration").value = m.duration || "شهر واحد"; document.getElementById("mem-start-date").value = m.startDate; document.getElementById("mem-end-date").value = m.endDate; document.getElementById("mem-price").value = m.price;
+                });
+                tbody.appendChild(tr);
+            });
+            calculateFinance();
+        }
+        
+        function showHistory(member) {
+            const section = document.getElementById("member-history-section");
+            const tbody = document.getElementById("history-table-body");
+            document.getElementById("history-player-name").textContent = member.name;
+            tbody.innerHTML = "";
+            
+            if(!member.history || member.history.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--text-muted);">لا توجد اشتراكات سابقة مسجلة (هذا هو الاشتراك الأول).</td></tr>`;
+            } else {
+                member.history.forEach(h => {
+                    const tr = document.createElement("tr");
+                    tr.innerHTML = `<td>${h.duration}</td><td>${h.type}</td><td>${formatToCustomDate(h.startDate)}</td><td>${formatToCustomDate(h.endDate)}</td><td>${h.price} ج.م</td>`;
+                    tbody.appendChild(tr);
+                });
+            }
+            section.classList.remove("hidden");
+        }
+
+        function renderAttendanceTable() {
+            const tbody = document.getElementById("attendance-table-body"); const financeTbody = document.getElementById("finance-attendance-tbody");
+            tbody.innerHTML = ""; financeTbody.innerHTML = ""; const list = db.attendance || [];
+            if(list.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--text-muted); padding:15px;">لم يحضر أحد اليوم حتى الآن.</td></tr>`;
+                financeTbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:var(--text-muted); padding:10px;">لا توجد سجلات حضور لليوم بعد.</td></tr>`;
+                return;
+            }
+            list.forEach(item => {
+                const tr = document.createElement("tr"); const outTimeDisp = item.timeout ? item.timeout : `<button class="filter-btn" style="padding:4px 10px; border-color:var(--status-warning); color:var(--status-warning);" onclick="checkoutAttendance(${item.id})">تسجيل انصراف 🚪</button>`;
+                const priceDisp = item.price > 0 ? `${item.price} ج.م` : "مشترك أساسي";
+                tr.innerHTML = `<td style="color:#fff; font-weight:bold;">${item.name}</td><td><span class="status-badge-text ${item.type === 'مشترك' ? 'badge-active':'badge-warning'}">${item.type}</span></td><td style="font-family:monospace; direction:ltr;">${item.timein}</td><td style="font-family:monospace; direction:ltr;">${outTimeDisp}</td><td style="color:var(--gold-bright); font-weight:bold;">${priceDisp}</td><td><button class="btn-logout" style="padding:3px 8px; font-size:11px;" onclick="deleteAttendance(${item.id})">حذف</button></td>`;
+                tbody.appendChild(tr);
+                const finTr = document.createElement("tr");
+                finTr.innerHTML = `<td style="color:#fff;">${item.name}</td><td><span class="status-badge-text ${item.type === 'مشترك' ? 'badge-active':'badge-warning'}">${item.type}</span></td><td>${item.timein}</td><td style="color:var(--status-active); font-weight:bold;">${item.price > 0 ? item.price + ' ج.م' : '0 ج.م (عضوية)'}</td>`;
+                financeTbody.appendChild(finTr);
+            });
+        }
+
+        function renderExpensesTable() {
+            const tbody = document.getElementById("expenses-table-body"); tbody.innerHTML = ""; const currentExpenses = db.expenses || [];
+            if(currentExpenses.length === 0) { tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--text-muted); padding:15px;">لا توجد مصروفات مسجلة.</td></tr>`; return; }
+            currentExpenses.forEach(exp => {
+                const tr = document.createElement("tr"); tr.innerHTML = `<td>${exp.id}</td><td style="color:#fff;">${exp.title}</td><td>${formatToCustomDate(exp.date)}</td><td style="color: #ff6b6b; font-weight:700;">${exp.amount} ج.م</td><td><button class="btn-logout" style="padding: 3px 8px; font-size:11px;" onclick="deleteExpense(${exp.id})">حذف</button></td>`;
+                tbody.appendChild(tr);
+            });
+        }
+        
+        function calculateFinance() {
+            const totalRevFromSubscriptions = (db.girls || []).reduce((sum,m)=>sum + parseFloat(m.price||0), 0);
+            const totalRevFromVisits = (db.attendance || []).reduce((sum,v)=>sum + parseFloat(v.price||0), 0);
+            const totalRev = totalRevFromSubscriptions + totalRevFromVisits;
+            const totalExp = (db.expenses || []).reduce((sum,e)=>sum + parseFloat(e.amount||0), 0);
+            document.getElementById("fin-total-revenue").textContent = `${totalRev} ج.م`; 
+            document.getElementById("fin-total-expenses").textContent = `${totalExp} ج.م`; 
+            document.getElementById("fin-net-profit").textContent = `${totalRev - totalExp} ج.م`;
+            document.getElementById("fin-total-members").textContent = `${(db.girls || []).length} لاعب`;
+            updateMonthlyCount();
+        }
+
+        function updateMonthlyCount() {
+            const selectedMonth = document.getElementById("fin-filter-month").value;
+            const countDisplay = document.getElementById("fin-monthly-count");
+            if(selectedMonth === "all") { countDisplay.style.display = "none"; return; }
+            const count = (db.girls || []).filter(m => {
+                if(!m.startDate) return false;
+                const parts = m.startDate.split('-'); return parts[1] === selectedMonth;
+            }).length;
+            countDisplay.textContent = `عدد مشتركين الشهر: ${count} لاعب`; countDisplay.style.display = "block";
+        }
+        
+        window.checkoutAttendance = function(id) {
+            const idx = db.attendance.findIndex(a => a.id === id);
+            if(idx !== -1) { db.attendance[idx].timeout = new Date().toTimeString().split(' ')[0]; save(); renderAttendanceTable(); }
+        }
+        window.deleteAttendance = function(id) { if(confirm("هل تريد حذف هذا السجل اليومي؟")) { db.attendance = db.attendance.filter(a => a.id !== id); save(); calculateFinance(); renderAttendanceTable(); } }
+        window.deleteExpense = function(id) { if(confirm("حذف بند المصروف؟")) { db.expenses = db.expenses.filter(e => e.id !== id); save(); calculateFinance(); renderExpensesTable(); } }
+        
+        function setupEvents() {
+            document.getElementById("mem-duration").addEventListener("change", autoCalculateEndDate); 
+            document.getElementById("mem-start-date").addEventListener("change", autoCalculateEndDate);
+            document.getElementById("att-search-input").addEventListener("input", (e) => { updateMemberDropdown(e.target.value); });
+            document.getElementById("fin-filter-month").addEventListener("change", updateMonthlyCount);
+            
+            const tabs = ["tab-girls", "tab-attendance", "tab-finance"];
+            const pages = ["page-girls-content", "page-attendance-content", "page-finance-content"];
+            
+            function switchTab(activeTabId, activePageId) {
+                tabs.forEach(t => document.getElementById(t).classList.remove("active-tab"));
+                pages.forEach(p => document.getElementById(p).classList.add("hidden"));
+                document.getElementById(activeTabId).classList.add("active-tab");
+                document.getElementById(activePageId).classList.remove("hidden");
+            }
+            
+            document.getElementById("tab-girls").addEventListener("click", () => switchTab("tab-girls", "page-girls-content"));
+            document.getElementById("tab-attendance").addEventListener("click", () => {
+                switchTab("tab-attendance", "page-attendance-content"); document.getElementById("att-search-input").value = ""; updateMemberDropdown(); renderAttendanceTable();
+            });
+            document.getElementById("tab-finance").addEventListener("click", () => {
+                switchTab("tab-finance", "page-finance-content"); renderExpensesTable(); renderAttendanceTable(); calculateFinance();
+            });
+            
+            document.getElementById("att-visitor-type").addEventListener("change", (e) => {
+                if(e.target.value === "مشترك") {
+                    document.getElementById("group-select-member").classList.remove("hidden");
+                    document.getElementById("group-custom-name").classList.add("hidden");
+                    document.getElementById("group-visit-price").classList.add("hidden");
+                } else {
+                    document.getElementById("group-select-member").classList.add("hidden");
+                    document.getElementById("group-custom-name").classList.remove("hidden");
+                    document.getElementById("group-visit-price").classList.remove("hidden");
+                }
+            });
+
+            document.getElementById("attendance-form").addEventListener("submit", (e) => {
+                e.preventDefault(); const type = document.getElementById("att-visitor-type").value; let name = ""; let price = 0;
+                if(type === "مشترك") {
+                    name = document.getElementById("att-member-select").value; if(!name || name.includes("لا يوجد")) return alert("لا يوجد لاعب مختار أو مطابق للبحث!");
+                } else {
+                    name = document.getElementById("att-custom-name").value.trim(); price = parseFloat(document.getElementById("att-visit-price").value) || 0;
+                    if(!name) return alert("يرجى كتابة اسم الزائر الحر!");
+                }
+                const attItem = { id: Date.now(), name, type, timein: new Date().toTimeString().split(' ')[0], timeout: null, price };
+                if(!db.attendance) db.attendance = [];
+                db.attendance.push(attItem);
+                save(); renderAttendanceTable(); calculateFinance();
+                document.getElementById("att-custom-name").value = ""; document.getElementById("att-search-input").value = ""; updateMemberDropdown();
+                alert("⏱️ تم تسجيل حضور اللاعب بنجاح!");
+            });
+
+            document.getElementById("expense-form").addEventListener("submit", (e) => {
+                e.preventDefault(); const title = document.getElementById("exp-title").value.trim(); const amount = document.getElementById("exp-amount").value; const date = document.getElementById("exp-date").value;
+                const expenseItem = { id: Date.now() % 1000, title, amount: parseFloat(amount)||0, date };
+                if(!db.expenses) db.expenses = [];
+                db.expenses.push(expenseItem); save(); calculateFinance(); renderExpensesTable(); 
+                document.getElementById("expense-form").reset(); alert("💸 تم تسجيل المصروف بنجاح!");
+            });
+            
+            document.getElementById("btn-member-new").addEventListener("click", () => { 
+                selectedId = null; document.getElementById("member-form").reset(); 
+                document.getElementById("mem-start-date").valueAsDate = new Date(); autoCalculateEndDate(); 
+                document.getElementById("member-history-section").classList.add("hidden"); renderTable(); 
+            });
+            
+            document.getElementById("btn-member-add").addEventListener("click", (e) => {
+                e.preventDefault(); const name = document.getElementById("mem-name").value.trim(); const phone = document.getElementById("mem-phone").value.trim(); const startDate = document.getElementById("mem-start-date").value; const endDate = document.getElementById("mem-end-date").value; const price = document.getElementById("mem-price").value;
+                if(!name || !phone || !startDate || !endDate || !price) { return alert("الرجاء إدخال كامل البيانات الأساسية!"); }
+                
+                const newMember = { id: Date.now() % 1000, name, phone, startDate, endDate, price: parseFloat(price)||0, duration: document.getElementById("mem-duration").value, weight: document.getElementById("mem-weight").value, age: document.getElementById("mem-age").value, type: document.getElementById("mem-type").value, history: [] };
+                if(!db.girls) db.girls = [];
+                db.girls.push(newMember); save(); renderTable(); updateMemberDropdown(); 
+                document.getElementById("member-form").reset(); document.getElementById("mem-start-date").valueAsDate = new Date(); autoCalculateEndDate(); alert("🎉 تم إضافة المشترك بنجاح!");
+            });
+
+            document.getElementById("btn-member-renew").addEventListener("click", () => {
+                if(!selectedId) return alert("يرجى اختيار لاعب أولاً من الجدول لتجديد اشتراكه.");
+                const idx = db.girls.findIndex(m => m.id === selectedId);
+                if(idx !== -1) {
+                    const current = db.girls[idx];
+                    if(!current.history) current.history = [];
+                    current.history.push({ duration: current.duration, type: current.type, startDate: current.startDate, endDate: current.endDate, price: current.price });
+                    
+                    current.startDate = document.getElementById("mem-start-date").value;
+                    current.endDate = document.getElementById("mem-end-date").value;
+                    current.duration = document.getElementById("mem-duration").value;
+                    current.type = document.getElementById("mem-type").value;
+                    current.price = parseFloat(document.getElementById("mem-price").value) || 0;
+                    current.weight = document.getElementById("mem-weight").value;
+                    current.age = document.getElementById("mem-age").value;
+                    
+                    save(); renderTable(); showHistory(current);
+                    alert(`🔄 تم تجديد الاشتراك للاعب ${current.name} بنجاح وأرشفة الاشتراك السابق!`);
+                }
+            });
+            
+            document.getElementById("btn-member-edit").addEventListener("click", () => {
+                if(!selectedId) return alert("يرجى اختيار مشترك أولاً من الجدول."); const idx = db.girls.findIndex(m => m.id === selectedId);
+                if(idx !== -1) { db.girls[idx] = { ...db.girls[idx], name: document.getElementById("mem-name").value.trim(), phone: document.getElementById("mem-phone").value.trim(), startDate: document.getElementById("mem-start-date").value, endDate: document.getElementById("mem-end-date").value, weight: document.getElementById("mem-weight").value, age: document.getElementById("mem-age").value, type: document.getElementById("mem-type").value, duration: document.getElementById("mem-duration").value, price: parseFloat(document.getElementById("mem-price").value)||0 }; save(); renderTable(); updateMemberDropdown(); alert("✏️ تم تعديل بيانات المشترك الحالي."); }
+            });
+            
+            document.getElementById("btn-member-delete").addEventListener("click", () => { if(!selectedId) return alert("يرجى تحديد اسم من الجدول لحذفه."); if(confirm("هل أنت متأكد من حذف هذا المشترك نهائياً؟")) { db.girls = db.girls.filter(m => m.id !== selectedId); save(); selectedId = null; document.getElementById("member-form").reset(); document.getElementById("member-history-section").classList.add("hidden"); renderTable(); updateMemberDropdown(); } });
+            
+            const filterBtns = document.querySelectorAll(".filter-btn"); filterBtns.forEach(btn => { btn.addEventListener("click", (e) => { filterBtns.forEach(b => b.classList.remove("active-filter")); const currentBtn = e.target.closest(".filter-btn"); currentBtn.classList.add("active-filter"); activeStatusFilter = currentBtn.getAttribute("data-filter"); renderTable(); }); });
+            document.getElementById("quick-search").addEventListener("input", (e) => { const term = e.target.value.toLowerCase(); const rows = document.getElementById("members-table-body").getElementsByTagName("tr"); for(let i=0; i<rows.length; i++) { const nameCell = rows[i].getElementsByTagName("td")[1]; if(nameCell) rows[i].style.display = nameCell.textContent.toLowerCase().includes(term) ? "" : "none"; } });
+        }
+    </script>
+</body>
+</html>

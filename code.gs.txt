@@ -1,0 +1,285 @@
+/***********************************************************************
+ * كود Google Apps Script - نظام إدارة جيم أبطال بطرة
+ * ---------------------------------------------------------------------
+ * الوظيفة: يستقبل البيانات من ملف الـ HTML ويخزّنها في Google Sheet،
+ * وينشئ الجداول (الشيتات) تلقائياً أول مرة تتصل فيها لو مش موجودة.
+ * كمان بيعرض السيستم نفسه (التصميم) لو حد فتح رابط الـ Web App مباشرة،
+ * عشان يبقى عندك رابط واحد بس يشتغل بيه صاحب الجيم والمدربين من أي جهاز
+ * (موبايل / لاب توب) وكلهم يشوفوا نفس البيانات لحظياً.
+ *
+ * 🔧 طريقة التركيب (اتبع الخطوات دي بالترتيب):
+ * 1) افتح Google Sheets واعمل ملف جديد فاضي (اسمه مثلاً: "بيانات جيم أبطال بطرة").
+ * 2) من القائمة العلوية: الإضافات (Extensions) > Apps Script.
+ * 3) امسح أي كود موجود في ملف Code.gs الافتراضي، وانسخ كل كود الملف ده والصقه بدله.
+ * 4) دوس على علامة (+) بجانب "الملفات" (Files) في القائمة الجانبية اليسرى،
+ *    واختار "HTML" ودّي الملف الاسم بالظبط: Index (من غير امتداد).
+ * 5) امسح أي محتوى جواه، وانسخ كل كود ملف "Index.html" اللي بعتناهولك والصقه فيه.
+ * 6) احفظ المشروع (Ctrl+S).
+ * 7) دوس "نشر" (Deploy) > "نشر جديد" (New deployment).
+ * 8) اختار نوع النشر: "تطبيق ويب" (Web app).
+ * 9) في "من يمكنه الوصول" (Who has access) اختار: "أي شخص" (Anyone).
+ * 10) دوس Deploy، ووافق على طلب الصلاحيات (Authorize).
+ * 11) هياخدلك رابط شكله: https://script.google.com/macros/s/xxxxxxxxx/exec
+ *     الرابط ده هو نفسه اللي هيفتح بيه صاحب الجيم والمدربين السيستم من أي جهاز.
+ *     احفظه/ابعته لأي حد هيستخدم السيستم (تقدر تعمله اختصار على الموبايل زي أي تطبيق).
+ *
+ * ⚠️ ملاحظة مهمة: في كل مرة تعدّل كود Code.gs أو Index.html، لازم تعمل
+ * "نشر جديد" (New deployment) تاني عشان التعديلات تتفعّل على نفس الرابط.
+ ***********************************************************************/
+
+const SHEET_MEMBERS = "المشتركين";
+const SHEET_ATTENDANCE = "الحضور";
+const SHEET_EXPENSES = "المصروفات";
+
+const MEMBERS_HEADERS = ["ID", "الاسم", "الهاتف", "المدة", "النوع", "الوزن", "العمر", "تاريخ البداية", "تاريخ النهاية", "السعر", "الحالة", "السجل السابق (JSON)"];
+const ATTENDANCE_HEADERS = ["ID", "الاسم", "النوع", "وقت الحضور", "وقت الانصراف", "السعر", "التاريخ"];
+const EXPENSES_HEADERS = ["ID", "البيان", "التاريخ", "المبلغ"];
+
+/* ========================= نقاط الدخول الرئيسية ========================= */
+
+function doGet(e) {
+  ensureSheets();
+  const action = e.parameter.action;
+  if (action === "getData") {
+    return jsonResponse(getAllData());
+  }
+  if (action === "ping") {
+    return jsonResponse({ status: "ok", message: "✅ نظام جيم أبطال بطرة متصل بجوجل شيت بنجاح" });
+  }
+  // مفيش action = يبقى حد فاتح الرابط من المتصفح مباشرة -> نعرضله السيستم نفسه
+  return HtmlService.createHtmlOutputFromFile('Index')
+    .setTitle('جيم أبطال بطرة')
+    .addMetaTag('viewport', 'width=device-width, initial-scale=1.0');
+}
+
+function doPost(e) {
+  ensureSheets();
+  let body;
+  try {
+    body = JSON.parse(e.postData.contents);
+  } catch (err) {
+    return jsonResponse({ error: "بيانات مرسلة غير صحيحة" });
+  }
+
+  const action = body.action;
+  const data = body.data;
+
+  try {
+    switch (action) {
+      case "add_member": addMember(data); break;
+      case "edit_member": editMember(data); break;
+      case "renew_member": renewMember(data); break;
+      case "delete_member": deleteMember(data); break;
+      case "add_attendance": addAttendance(data); break;
+      case "checkout_attendance": checkoutAttendance(data); break;
+      case "delete_attendance": deleteAttendanceRow(data); break;
+      case "add_expense": addExpense(data); break;
+      case "delete_expense": deleteExpenseRow(data); break;
+      default: return jsonResponse({ error: "إجراء غير معروف: " + action });
+    }
+    return jsonResponse(getAllData());
+  } catch (err) {
+    return jsonResponse({ error: err.toString() });
+  }
+}
+
+function jsonResponse(obj) {
+  return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);
+}
+
+/* ========================= إنشاء الجداول تلقائياً ========================= */
+
+function ensureSheets() {
+  getOrCreateSheet(SHEET_MEMBERS, MEMBERS_HEADERS);
+  getOrCreateSheet(SHEET_ATTENDANCE, ATTENDANCE_HEADERS);
+  getOrCreateSheet(SHEET_EXPENSES, EXPENSES_HEADERS);
+  ensurePhoneColumnIsText();
+}
+
+// بنجبر عمود "الهاتف" (العمود الثالث في شيت المشتركين) يكون نص وليس رقم
+// عشان جوجل شيت متشيلش الصفر الأول من رقم التليفون
+function ensurePhoneColumnIsText() {
+  const sheet = getSS().getSheetByName(SHEET_MEMBERS);
+  if (!sheet) return;
+  sheet.getRange("C:C").setNumberFormat("@");
+}
+
+function getSS() {
+  return SpreadsheetApp.getActiveSpreadsheet();
+}
+
+function getOrCreateSheet(name, headers) {
+  const ss = getSS();
+  let sheet = ss.getSheetByName(name);
+  if (!sheet) {
+    sheet = ss.insertSheet(name);
+    sheet.appendRow(headers);
+    sheet.getRange(1, 1, 1, headers.length)
+      .setFontWeight("bold")
+      .setBackground("#d4af37")
+      .setFontColor("#111111");
+    sheet.setFrozenRows(1);
+    sheet.autoResizeColumns(1, headers.length);
+  }
+  return sheet;
+}
+
+/* ========================= حساب حالة الاشتراك ========================= */
+
+function getSubscriptionStatus(endDateStr) {
+  if (!endDateStr) return "غير محدد";
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const endDate = new Date(endDateStr); endDate.setHours(0, 0, 0, 0);
+  const diffDays = Math.ceil((endDate - today) / (1000 * 60 * 60 * 24));
+  if (diffDays < 0) return "منتهي ❌";
+  if (diffDays <= 7) return `ينتهي خلال ${diffDays} يوم`;
+  return "نشطة وسارية ✅";
+}
+
+// بتحدّث عمود "الحالة" لكل المشتركين تلقائياً في الشيت نفسه في كل مرة يتم فيها جلب البيانات
+function refreshMemberStatuses() {
+  const sheet = getSS().getSheetByName(SHEET_MEMBERS);
+  const values = sheet.getDataRange().getValues();
+  for (let i = 1; i < values.length; i++) {
+    if (!values[i][0] && values[i][0] !== 0) continue;
+    const endDate = values[i][8]; // عمود "تاريخ النهاية"
+    const newStatus = getSubscriptionStatus(endDate);
+    if (values[i][10] !== newStatus) {
+      sheet.getRange(i + 1, 11).setValue(newStatus); // عمود "الحالة"
+    }
+  }
+}
+
+/* ========================= قراءة كل البيانات ========================= */
+
+function formatDate(val) {
+  if (!val) return "";
+  if (Object.prototype.toString.call(val) === "[object Date]") {
+    const y = val.getFullYear(), m = String(val.getMonth() + 1).padStart(2, '0'), d = String(val.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  }
+  return val;
+}
+
+function readSheetAsObjects(sheetName) {
+  const sheet = getSS().getSheetByName(sheetName);
+  const values = sheet.getDataRange().getValues();
+  if (values.length < 2) return [];
+  const headers = values[0];
+  return values.slice(1)
+    .filter(r => r[0] !== "" && r[0] !== null)
+    .map(r => {
+      const obj = {};
+      headers.forEach((h, i) => obj[h] = r[i]);
+      return obj;
+    });
+}
+
+function getAllData() {
+  refreshMemberStatuses(); // تحديث الحالة تلقائياً قبل الإرسال
+
+  const members = readSheetAsObjects(SHEET_MEMBERS).map(m => {
+    let history = [];
+    try { history = m["السجل السابق (JSON)"] ? JSON.parse(m["السجل السابق (JSON)"]) : []; } catch (err) { history = []; }
+    return {
+      id: m["ID"], name: m["الاسم"], phone: m["الهاتف"] !== "" && m["الهاتف"] !== null ? String(m["الهاتف"]) : "", duration: m["المدة"], type: m["النوع"],
+      weight: m["الوزن"], age: m["العمر"],
+      startDate: formatDate(m["تاريخ البداية"]), endDate: formatDate(m["تاريخ النهاية"]),
+      price: m["السعر"], history: history
+    };
+  });
+
+  const attendance = readSheetAsObjects(SHEET_ATTENDANCE).map(a => ({
+    id: a["ID"], name: a["الاسم"], type: a["النوع"],
+    timein: a["وقت الحضور"], timeout: a["وقت الانصراف"] || null,
+    price: a["السعر"]
+  }));
+
+  const expenses = readSheetAsObjects(SHEET_EXPENSES).map(x => ({
+    id: x["ID"], title: x["البيان"], date: formatDate(x["التاريخ"]), amount: x["المبلغ"]
+  }));
+
+  return { girls: members, attendance: attendance, expenses: expenses };
+}
+
+function findRowById(sheet, id) {
+  const values = sheet.getDataRange().getValues();
+  for (let i = 1; i < values.length; i++) {
+    if (String(values[i][0]) === String(id)) return i + 1; // رقم الصف (1-indexed)
+  }
+  return -1;
+}
+
+/* ========================= المشتركين (قسم الرجال والشباب) ========================= */
+
+function addMember(m) {
+  const sheet = getSS().getSheetByName(SHEET_MEMBERS);
+  const status = getSubscriptionStatus(m.endDate);
+  sheet.appendRow([
+    m.id, m.name, String(m.phone), m.duration, m.type, m.weight, m.age,
+    m.startDate, m.endDate, m.price, status, JSON.stringify(m.history || [])
+  ]);
+}
+
+function editMember(m) {
+  const sheet = getSS().getSheetByName(SHEET_MEMBERS);
+  const row = findRowById(sheet, m.id);
+  if (row === -1) return;
+  const status = getSubscriptionStatus(m.endDate);
+  sheet.getRange(row, 1, 1, 11).setValues([[
+    m.id, m.name, String(m.phone), m.duration, m.type, m.weight, m.age,
+    m.startDate, m.endDate, m.price, status
+  ]]);
+}
+
+// 🔄 تجديد الاشتراك: بيحدّث بيانات الاشتراك وبيحفظ السجل القديم في عمود "السجل السابق"
+// وبالتالي حالة المشترك (نشط / منتهي / قريب الانتهاء) بتتغير لوحدها حسب التاريخ الجديد
+function renewMember(m) {
+  const sheet = getSS().getSheetByName(SHEET_MEMBERS);
+  const row = findRowById(sheet, m.id);
+  if (row === -1) { addMember(m); return; }
+  const status = getSubscriptionStatus(m.endDate);
+  sheet.getRange(row, 1, 1, 12).setValues([[
+    m.id, m.name, String(m.phone), m.duration, m.type, m.weight, m.age,
+    m.startDate, m.endDate, m.price, status, JSON.stringify(m.history || [])
+  ]]);
+}
+
+function deleteMember(m) {
+  const sheet = getSS().getSheetByName(SHEET_MEMBERS);
+  const row = findRowById(sheet, m.id);
+  if (row !== -1) sheet.deleteRow(row);
+}
+
+/* ========================= الحضور اليومي ========================= */
+
+function addAttendance(a) {
+  const sheet = getSS().getSheetByName(SHEET_ATTENDANCE);
+  const dateStr = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "yyyy-MM-dd");
+  sheet.appendRow([a.id, a.name, a.type, a.timein, a.timeout || "", a.price || 0, dateStr]);
+}
+
+function checkoutAttendance(a) {
+  const sheet = getSS().getSheetByName(SHEET_ATTENDANCE);
+  const row = findRowById(sheet, a.id);
+  if (row !== -1) sheet.getRange(row, 5).setValue(a.timeout); // عمود "وقت الانصراف"
+}
+
+function deleteAttendanceRow(a) {
+  const sheet = getSS().getSheetByName(SHEET_ATTENDANCE);
+  const row = findRowById(sheet, a.id);
+  if (row !== -1) sheet.deleteRow(row);
+}
+
+/* ========================= المصروفات ========================= */
+
+function addExpense(x) {
+  const sheet = getSS().getSheetByName(SHEET_EXPENSES);
+  sheet.appendRow([x.id, x.title, x.date, x.amount]);
+}
+
+function deleteExpenseRow(x) {
+  const sheet = getSS().getSheetByName(SHEET_EXPENSES);
+  const row = findRowById(sheet, x.id);
+  if (row !== -1) sheet.deleteRow(row);
+}
